@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Ostereier-Suchspiel</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #game {
+      position: relative;
+      max-width: 1024px;
+    }
+    #eibild {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .zone {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0);
+      cursor: pointer;
+    }
+    #counter {
+      margin: 15px;
+      font-size: 1.5em;
+    }
+    .popup {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      text-align: center;
+      z-index: 13;
+    }
+    .popup button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+    }
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 5;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <img id="eibild" src="osterei.jpg" alt="Ostereiersuche">
+  </div>
+  <div id="counter">0 Ostereier gefunden!</div>
+
+  <div id="intro" class="popup">
+    <div><strong>Hallo!</strong><br>Finde die Ostereier!</div>
+    <button onclick="startGame()">Los!</button>
+  </div>
+  <div id="overlay"></div>
+
+  <div id="popup" class="popup" style="display:none">
+    <div>🎉 Super – Du hast alle 13 Ostereier gefunden!</div>
+    <button onclick="location.reload()">Nochmal?</button>
+  </div>
+
+  <div id="nikolausiPopup" class="popup" style="display:none">
+    <div>😲 Oh nein! Das war Nikolausi!!</div>
+    <button onclick="location.reload()">Nochmal!</button>
+  </div>
+
+  <script>
+    const targets = [
+      { x: 380, y: 233, r: 50 },
+      { x: 100, y: 413, r: 50 },
+      { x: 280, y: 443, r: 50 },
+      { x: 180, y: 603, r: 50 },
+      { x: 258, y: 785, r: 50 },
+      { x: 382, y: 707, r: 50 },
+      { x: 532, y: 669, r: 50 },
+      { x: 1359, y: 197, r: 50 },
+      { x: 1282, y: 541, r: 50 },
+      { x: 1404, y: 711, r: 50 },
+      { x: 1066, y: 881, r: 50 },
+      { x: 1200, y: 869, r: 50 },
+      { x: 1406, y: 897, r: 50 },
+    ];
+
+    const nikolausi = { x: 1024, y: 487, r: 50 };
+
+    const game = document.getElementById('game');
+    const counter = document.getElementById('counter');
+    const popup = document.getElementById('popup');
+    const nikolausiPopup = document.getElementById('nikolausiPopup');
+    let found = 0;
+
+    function updateCounter() {
+      let wort = found === 1 ? 'Osterei' : 'Ostereier';
+      counter.textContent = `${found} ${wort} gefunden!`;
+    }
+
+    function checkDone() {
+      if (found === targets.length) {
+        popup.style.display = 'block';
+      }
+    }
+
+    function closeNikolausi() {
+      nikolausiPopup.style.display = 'none';
+    }
+
+    function createZones() {
+      const img = document.getElementById('eibild');
+      const scale = img.clientWidth / img.naturalWidth;
+
+      // Ostereier-Zonen
+      targets.forEach((t) => {
+        const z = document.createElement('div');
+        z.className = 'zone';
+        z.style.width = `${2 * t.r * scale}px`;
+        z.style.height = `${2 * t.r * scale}px`;
+        z.style.left = `${(t.x - t.r) * scale}px`;
+        z.style.top = `${(t.y - t.r) * scale}px`;
+        z.onclick = () => {
+          if (!z.classList.contains('found')) {
+            z.classList.add('found');
+            z.style.background = 'rgba(255,255,255,0.5)';
+            found++;
+            updateCounter();
+            checkDone();
+          }
+        };
+        game.appendChild(z);
+      });
+
+      // Nikolausi-Zone
+      const n = document.createElement('div');
+      n.className = 'zone';
+      n.style.width = `${2 * nikolausi.r * scale}px`;
+      n.style.height = `${2 * nikolausi.r * scale}px`;
+      n.style.left = `${(nikolausi.x - nikolausi.r) * scale}px`;
+      n.style.top = `${(nikolausi.y - nikolausi.r) * scale}px`;
+      n.onclick = () => {
+        nikolausiPopup.style.display = 'block';
+      };
+      game.appendChild(n);
+    }
+
+    function startGame() {
+      document.getElementById('intro').style.display = 'none';
+      document.getElementById('overlay').style.display = 'none';
+      createZones();
+      updateCounter();
+    }
+  </script>
+</body>
+</html>
